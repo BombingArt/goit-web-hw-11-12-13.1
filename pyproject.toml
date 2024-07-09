@@ -14,6 +14,9 @@ alembic = "^1.13.1"
 uvicorn = {extras = ["standard"], version = "^0.30.1"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+fastapi-mail = "^1.4.1"
+python-dotenv = "^1.0.1"
+pydantic-settings = "^2.3.4"
 
 
 [build-system]

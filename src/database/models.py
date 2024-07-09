@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, func, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Date,
+    DateTime,
+    func,
+    ForeignKey,
+    Boolean,
+)
 from sqlalchemy.orm import relationship
 from src.database.db import Base
 
@@ -13,6 +22,7 @@ class User(Base):
     contacts = relationship("Contact", back_populates="owner")
     created_at = Column("crated_at", DateTime, default=func.now())
     refresh_token = Column(String(255), nullable=True)
+    confirmed = Column(Boolean, default=False)
 
 
 class Contact(Base):

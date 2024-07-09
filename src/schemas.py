@@ -77,3 +77,7 @@ class ContactResponse(ContactBase):
 
     class Config:
         from_attributes = True
+
+
+class RequestEmail(BaseModel):
+    email: EmailStr
