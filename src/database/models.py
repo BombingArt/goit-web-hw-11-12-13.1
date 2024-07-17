@@ -19,6 +19,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
+    avatar = Column(String, nullable=True)
     contacts = relationship("Contact", back_populates="owner")
     created_at = Column("crated_at", DateTime, default=func.now())
     refresh_token = Column(String(255), nullable=True)

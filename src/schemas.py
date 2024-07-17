@@ -7,12 +7,14 @@ class UserModel(BaseModel):
     username: str
     email: EmailStr
     password: str = Field(min_length=6, max_length=10)
+    avatar: str
 
 
 class UserDb(BaseModel):
     id: int
     username: str
     email: str
+    avatar: str
     created_at: datetime
 
     class Config:

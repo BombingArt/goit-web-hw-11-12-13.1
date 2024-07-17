@@ -10,11 +10,17 @@ from src.schemas import ContactCreate, ContactUpdate, ContactResponse
 from src.database.models import User, Contact
 from src.services.auth import auth_service
 
+from fastapi_limiter.depends import RateLimiter
+
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
 
 @router.post(
-    "/contacts/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED
+    "/contacts/",
+    response_model=ContactResponse,
+    status_code=status.HTTP_201_CREATED,
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 def create_contact(
     contact: ContactCreate,
@@ -24,7 +30,12 @@ def create_contact(
     return contacts.create_contact(db=db, contact=contact, user=current_user)
 
 
-@router.get("/contacts/", response_model=List[ContactResponse])
+@router.get(
+    "/contacts/",
+    response_model=List[ContactResponse],
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 def read_contacts(
     skip: int = 0,
     limit: int = 10,
@@ -34,7 +45,12 @@ def read_contacts(
     return contacts.get_contacts(db=db, skip=skip, limit=limit, user=current_user)
 
 
-@router.get("/contacts/{contact_id}", response_model=ContactResponse)
+@router.get(
+    "/contacts/{contact_id}",
+    response_model=ContactResponse,
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 def read_contact(
     contact_id: int,
     db: Session = Depends(db.get_db),
@@ -129,7 +145,12 @@ def delete_contact(
     return {"detail": "Contact deleted"}
 
 
-@router.get("/contacts/search/", response_model=List[ContactResponse])
+@router.get(
+    "/contacts/search/",
+    response_model=List[ContactResponse],
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 def search_contacts_api(
     query: str = Query(
         ..., description="Search query for first name, last name, or email"

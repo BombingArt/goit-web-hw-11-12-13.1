@@ -17,6 +17,9 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 fastapi-mail = "^1.4.1"
 python-dotenv = "^1.0.1"
 pydantic-settings = "^2.3.4"
+fastapi-limiter = "^0.1.6"
+redis = "^5.0.7"
+cloudinary = "^1.40.0"
 
 
 [build-system]
