@@ -31,11 +31,17 @@ create_tables()
 
 @app.on_event("startup")
 async def startup():
-    r = await redis.Redis(
+    r = redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
         db=0,
         encoding="utf-8",
         decode_responses=True,
     )
+    # Проверка подключения
+    try:
+        await r.ping()
+        print("Connected to Redis")
+    except Exception as e:
+        print(f"Could not connect to Redis: {e}")
     await FastAPILimiter.init(r)

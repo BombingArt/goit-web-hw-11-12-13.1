@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -20,7 +19,6 @@ from src.database.db import get_db
 from src.schemas import UserModel, UserResponse, TokenModel, RequestEmail
 from src.repository import users as repository_users
 from src.services.auth import auth_service
-
 from src.services.email import send_email
 
 
@@ -37,6 +35,24 @@ async def signup(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    """
+    Registers a new user.
+
+    Checks if a user with the given email exists. If not, creates a new user, 
+    hashes their password, and sends a confirmation email.
+
+    Args:
+        body (UserModel): Data for creating a new user.
+        background_tasks (BackgroundTasks): Background task for sending email.
+        request (Request): Request for obtaining the base URL.
+        db (Session): Database session.
+
+    Returns:
+        dict: Response with the new user data and a confirmation message.
+
+    Raises:
+        HTTPException: If a user with the given email already exists.
+    """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(
@@ -57,6 +73,21 @@ async def signup(
 async def login(
     body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
+    """
+    Logs in a user.
+
+    Checks user credentials, validates their password, and returns access and refresh tokens.
+
+    Args:
+        body (OAuth2PasswordRequestForm): Form for login with email and password.
+        db (Session): Database session.
+
+    Returns:
+        dict: Response with access and refresh tokens.
+
+    Raises:
+        HTTPException: If the email is not confirmed or the password is incorrect.
+    """
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(
@@ -86,6 +117,21 @@ async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: Session = Depends(get_db),
 ):
+    """
+    Refreshes access and refresh tokens.
+
+    Checks the validity of the provided refresh token and returns new access and refresh tokens.
+
+    Args:
+        credentials (HTTPAuthorizationCredentials): Authorization data (token).
+        db (Session): Database session.
+
+    Returns:
+        dict: Response with new access and refresh tokens.
+
+    Raises:
+        HTTPException: If the refresh token is invalid.
+    """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repository_users.get_user_by_email(email, db)
@@ -107,6 +153,21 @@ async def refresh_token(
 
 @router.get("/confirmed_email/{token}")
 async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    """
+    Confirms the user's email.
+
+    Uses the provided token to confirm the user's email address.
+
+    Args:
+        token (str): Confirmation token.
+        db (Session): Database session.
+
+    Returns:
+        dict: Message about the email confirmation.
+
+    Raises:
+        HTTPException: If the user with the given email is not found or the email is already confirmed.
+    """
     email = await auth_service.get_email_from_token(token)
     user = await repository_users.get_user_by_email(email, db)
     if user is None:
@@ -126,6 +187,23 @@ async def request_email(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    """
+    Requests a resend of the confirmation email.
+
+    Sends a confirmation email to the provided email address if it has not been confirmed yet.
+
+    Args:
+        body (RequestEmail): Schema with the email for resending.
+        background_tasks (BackgroundTasks): Background task for sending email.
+        request (Request): Request for obtaining the base URL.
+        db (Session): Database session.
+
+    Returns:
+        dict: Message about the email check.
+
+    Raises:
+        HTTPException: If the email is not found.
+    """
     user = await repository_users.get_user_by_email(body.email, db)
 
     if user.confirmed:
